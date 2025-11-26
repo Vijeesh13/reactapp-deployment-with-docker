@@ -2,16 +2,29 @@ pipeline {
     agent any
 
     stages {
-        stage ('changing the file permission') {
+
+        stage('Docker Login') {
             steps {
-                sh ' chmod +x build.sh'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub',
+                    usernameVariable: 'DOCKER_USERNAME',
+                    passwordVariable: 'DOCKER_PASSWORD')]) {
+
+                    sh 'docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD'
+                }
             }
         }
 
-        stage ('executing the file') {
+        stage('Build Docker Image') {
             steps {
-                sh './build.sh'
+                sh 'docker build -t vijeesh13/react-app:latest .'
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                sh 'docker push vijeesh13/react-app:latest'
             }
         }
     }
 }
+
